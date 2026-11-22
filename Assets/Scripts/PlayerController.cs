@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 // moves the fox with the joystick, jumps with the jump button
 // and picks the right animation (idle, run, jump, fall)
@@ -43,6 +44,14 @@ public class PlayerController : MonoBehaviour
 
         // left / right from the joystick
         float x = joystick.Horizontal;
+
+        // keyboard too (A/D or arrows) so i can test on the pc with one mouse
+        Keyboard kb = Keyboard.current;
+        if (kb != null && x == 0f)
+        {
+            if (kb.aKey.isPressed || kb.leftArrowKey.isPressed) x = -1f;
+            if (kb.dKey.isPressed || kb.rightArrowKey.isPressed) x = 1f;
+        }
         rb.linearVelocity = new Vector2(x * moveSpeed, rb.linearVelocity.y);
 
         // turn the fox to the way it is moving
@@ -50,7 +59,10 @@ public class PlayerController : MonoBehaviour
         else if (x < -0.01f) spriteRenderer.flipX = true;
 
         // jump only if we are on the ground
-        if (jumpButton.WasPressed() && isGrounded)
+        bool jumpPressed = jumpButton.WasPressed();
+        if (kb != null && kb.spaceKey.wasPressedThisFrame) jumpPressed = true; // space = jump
+
+        if (jumpPressed && isGrounded)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         }
